@@ -1,0 +1,174 @@
+ <!DOCTYPE html>
+<html>
+<head>
+  <title>5xStudio</title>
+  <style>
+    body {
+      background-color: #000000;
+    }
+
+    .studio {
+      width: 320px;
+      height: 320px;
+      border-radius: 25px;
+      background-color: #090909;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      justify-items: center;
+      align-items: center;
+      gap: 8.45px;
+      margin: 0 auto; /* Add this line to horizontally center the container */
+      margin-top: 50px; /* Adjust the top margin as desired */
+    }
+
+    .dot {
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      background-color: #393939;
+      cursor: pointer;
+    }
+
+    .dot.active {
+      background-color: var(--dot-color, #ff0000);
+    }
+
+    .button-container {
+      margin-top: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .button-container button {
+      padding: 6px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: transparent;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .button-container button .material-icons {
+      font-size: 18px;
+    }
+
+    .button-container input[type="color"] {
+      padding: 8px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background-color: #090909;
+      color: white;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .button-container input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    .button-container input[type="color"]::-webkit-color-swatch {
+      border: none;
+      border-radius: 4px;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+  <div class="studio"></div>
+
+  <div class="button-container">
+    <input type="color" id="colorPicker" value="#ff0000">
+    <button id="generateButton">
+      <span class="material-icons">save</span>
+      
+    </button>
+  </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', (event) => {
+      const studio = document.querySelector('.studio');
+      const dotsPerRow = 5;
+      const totalDots = 25;
+      const dotSize = 80;
+      const spacing = 27;
+      let dotColor = '#ff0000';
+
+      // Create dots
+      for (let i = 0; i < totalDots; i++) {
+        const dot = document.createElement('div');
+        dot.classList.add('dot');
+        studio.appendChild(dot);
+      }
+
+      // Add click event listener to each dot
+      const dots = document.querySelectorAll('.dot');
+      dots.forEach((dot) => {
+        dot.addEventListener('click', toggleDot);
+      });
+
+      // Toggle dot active/inactive
+      function toggleDot() {
+        this.classList.toggle('active');
+      }
+
+      // Update dot color
+      const colorPicker = document.getElementById('colorPicker');
+      colorPicker.addEventListener('input', updateDotColor);
+
+      function updateDotColor(event) {
+        dotColor = event.target.value;
+        document.documentElement.style.setProperty('--dot-color', dotColor);
+      }
+
+      // Generate the upscaled icon and download it
+      function generateIcon() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1024;
+        canvas.height = 1024;
+        const context = canvas.getContext('2d');
+        context.fillStyle = '#090909';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        const dotGroupWidth = dotsPerRow * (dotSize + spacing) - spacing;
+        const dotGroupHeight = Math.ceil(totalDots / dotsPerRow) * (dotSize + spacing) - spacing;
+        const xOffset = (canvas.width - dotGroupWidth) / 2;
+        const yOffset = (canvas.height - dotGroupHeight) / 2;
+
+        dots.forEach((dot, index) => {
+          const row = Math.floor(index / dotsPerRow);
+          const col = index % dotsPerRow;
+          const x = xOffset + col * (dotSize + spacing);
+          const y = yOffset + row * (dotSize + spacing);
+
+          if (dot.classList.contains('active')) {
+            context.fillStyle = dotColor;
+            context.beginPath();
+            context.arc(x + dotSize / 2, y + dotSize / 2, dotSize / 2, 0, 2 * Math.PI);
+            context.fill();
+          }
+        });
+
+        // Convert canvas to image URL
+        const imageURL = canvas.toDataURL();
+
+        // Create a temporary link element and download the image
+        const link = document.createElement('a');
+        link.href = imageURL;
+        link.download = '5xS.png';
+        link.click();
+      }
+
+      // Example: Generate the icon when the button is clicked
+      const generateButton = document.getElementById('generateButton');
+      generateButton.addEventListener('click', generateIcon);
+    });
+  </script>
+</body>
+</html>
